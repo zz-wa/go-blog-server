@@ -1,0 +1,21 @@
+# 编译产物
+blog_r
+
+# 数据库数据目录
+pgdata/
+
+# 上传文件（保留目录）
+uploads/file/*
+!uploads/file/.gitkeep
+
+# 配置文件（含敏感信息，本地保留，不上传）
+internal/global/config.yaml
+
+# IDE
+.idea/
+
+# 个人计划文档
+PLAN.md
+
+# 系统文件
+.DS_Store

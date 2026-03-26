@@ -1,0 +1,14 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: postgres15
+    # 这一行是解决你报错的关键：它会让 Docker 停止尝试操作 iptables
+    network_mode: "host"
+    restart: always
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: qa.86....
+      POSTGRES_DB: gva_blog
+    # 注意：在 host 模式下，ports 就不写了，它会自动占用宿主机的 5432
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data

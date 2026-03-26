@@ -1,0 +1,15 @@
+### 更新文章
+PUT http://localhost:8080/api/v1/admin/articles/1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjYsImlzcyI6ImJsb2ciLCJleHAiOjE3NzM4MzQ0ODh9.XyVL6F8yzPmbnvSCXzFrLH3sfh5LV2GVuwtc-mMVg_w
+
+{
+  "title": "Day5 更新后的标题",
+  "content": "更新后的内容",
+  "summary": "更新后的摘要",
+  "cover": "",
+  "category_id": 1,
+  "tags": [2, 3],
+  "status": 2
+}
+

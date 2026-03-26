@@ -1,0 +1,70 @@
+Server:
+  Mode: "debug"
+  Port: 8080
+  DbType: "postgres"
+  DbAutoMigrate: true
+  DbLogMode: "silent"
+
+Log:
+  Level: "debug"
+  Prefix: "[GVA]"
+  Format: "text"
+  Directory: "logs"
+
+JWT:
+  Secret: "your_jwt_secret_here"
+  Expire: 24
+  Issuer: "blog"
+
+Pgsql:
+  Host: "localhost"
+  Port: "5432"
+  User: "your_db_user"
+  Password: "your_db_password"
+  DbName: "your_db_name"
+  Config: "sslmode=disable TimeZone=Asia/Shanghai"
+
+Sqlite:
+  Dsn: "gva.db"
+
+Redis:
+  DB: 0
+  Addr: "127.0.0.1:6379"
+  Password: ""
+
+Session:
+  Name: "gva_session"
+  Salt: "gva_salt"
+  MaxAge: 600
+
+Email:
+  Form: ""
+  Host: ""
+  Port: 456
+  SmtpUser: ""
+  SmtpPass: ""
+
+Captcha:
+  ExpireTime: 300
+  Length: 6
+  Mode: "number"
+
+Upload:
+  Size: 5
+  OssType: "local"
+  Path: "uploads/file"
+  StorePath: "uploads/file"
+
+Qiniu:
+  ImgPath: ""
+  Zone: ""
+  Bucket: ""
+  AccessKey: ""
+  SecretKey: ""
+  UseHTTPS: false
+  UseCdnDomains: false
+
+Admin:
+  Username: "admin"
+  Email: "admin@example.com"
+  Password: "your_admin_password"
