@@ -15,9 +15,16 @@ A RESTful blog backend built with Go, featuring JWT authentication, RBAC authori
 ## Features
 
 - User registration & login with JWT
-- Role-based access control (Casbin)
+- Role-based access control (Casbin): visitor / user / admin
 - Article management with category & tag associations (many-to-many)
 - Article list filtering by status / category / tag / keyword with pagination
+- Article archive (grouped by year/month)
+- Article view count tracking
+- Comment system (users post comments, admin deletes)
+- Like system for articles and comments (Redis Set + DB persistence)
+- Admin dashboard statistics (article count, views, categories, tags, users)
+- Public home page aggregation endpoint
+- System config management (key-value store, includes "about" page)
 - Admin user management (list, update, reset password, enable/disable)
 - Role & menu management
 - File upload (local storage)
@@ -71,7 +78,7 @@ Edit `config.yaml`:
 - Set a strong `JWT.Secret`
 - Set `Admin.Email` and `Admin.Password` for the initial admin account
 
-3. Start PostgreSQL (Docker)
+3. Start PostgreSQL and Redis (Docker)
 
 ```bash
 docker compose up -d
@@ -90,24 +97,37 @@ The server starts on port `8080` by default.
 | Group | Prefix | Auth Required |
 |-------|--------|--------------|
 | Public | `/api/v1/public/` | No |
-| User | `/api/v1/user/` | JWT |
+| User | `/api/v1/user/` | JWT (any logged-in user) |
 | Admin | `/api/v1/admin/` | JWT + Admin role |
 
 ### Key Endpoints
 
 ```
+# Public
 POST   /api/v1/public/register
 POST   /api/v1/public/login
+GET    /api/v1/public/home
 GET    /api/v1/public/articles
 GET    /api/v1/public/articles/:id
+GET    /api/v1/public/archive
+GET    /api/v1/public/commentList/:article_id
+GET    /api/v1/public/about
 
-GET    /api/v1/user/profile
-POST   /api/v1/user/upload
+# User (login required)
+POST   /api/v1/user/comment/:article_id
+POST   /api/v1/user/like/:like_type/:target_id
 
+# Admin
 GET    /api/v1/admin/articles
 POST   /api/v1/admin/articles
 PUT    /api/v1/admin/articles/:id
 DELETE /api/v1/admin/articles/:id
+DELETE /api/v1/admin/comment/:id
+
+GET    /api/v1/admin/dashboard
+GET    /api/v1/admin/configs
+PUT    /api/v1/admin/configs/:key
+PUT    /api/v1/admin/about
 
 GET    /api/v1/admin/userlist
 PUT    /api/v1/admin/users/:id
