@@ -138,6 +138,10 @@ GET    /api/v1/admin/login-logs
 GET    /api/v1/admin/operation-logs
 ```
 
+## Reference
+
+This project was built as a learning exercise, referencing the architecture and feature set of [Gin-Vue-Admin/gin-vue-blog](https://github.com/Tjyy-1223/Gin-Vue-Admin) (Gin + Vue full-stack blog). Rewritten from scratch using Echo v5 instead of Gin, with a simplified feature set focused on the core backend.
+
 ## License
 
 [MIT](LICENSE)
