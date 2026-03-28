@@ -16,8 +16,8 @@ func MakeMigration(db *gorm.DB) error {
 		&Role{},
 		&Menu{},
 		&LoginLog{},
-		&OperationLog{})
-
+		&OperationLog{},
+		&Comment{})
 }
 
 type Model struct {

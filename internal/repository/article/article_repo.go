@@ -4,6 +4,8 @@ import (
 	"blog_r/internal/global"
 	"blog_r/internal/model"
 	"errors"
+
+	"gorm.io/gorm"
 )
 
 func CreateArticle(article *model.Article) error {
@@ -11,7 +13,12 @@ func CreateArticle(article *model.Article) error {
 }
 func GetArticleByID(id int) (model.Article, error) {
 	article := model.Article{}
-	db := global.DB.Preload("Tags").Where("id=?", id).First(&article)
+	_ = global.DB.Model(&model.Article{}).
+		Where("id=?", id).
+		UpdateColumn("views", gorm.Expr("views+1")).Error
+	db := global.DB.Preload("Tags").
+		Where("id=?", id).
+		First(&article)
 	if db.Error != nil {
 		return model.Article{}, db.Error
 	}
@@ -50,6 +57,16 @@ func GetArticleList(page, pageSize int, status *int, categoryID, tagID int, keyW
 	}
 	return articles, total, nil
 }
+
+func GetPublishedArticleForArchive() ([]model.Article, error) {
+	db := global.DB.Model(&model.Article{})
+	var articles []model.Article
+	if err := db.Where("status=?", 1).Order("created_at DESC").Find(&articles).Error; err != nil {
+		return []model.Article{}, err
+	}
+	return articles, nil
+}
+
 func UpdateArticle(article *model.Article) error {
 	return global.DB.Save(article).Error
 }

@@ -20,10 +20,14 @@ func NewRouter() *echo.Echo {
 	public.POST("/login", api.Login, middleware.RateLimitMiddleware)
 	public.GET("/articles", api.ArticleList)
 	public.GET("/articles/:id", api.ArticleDetail)
+	public.GET("/archive", api.ArticleArchive)
+	public.GET("/about", api.GetConfigAbout)
+	public.GET("/home", api.Home)
+	public.GET("/commentList/:article_id", api.CommentList)
 
 	userGroup := v1.Group("/user", middleware.AuthMiddleware, middleware.PermissionMiddleware)
-	userGroup.GET("/profile", api.Profile)
-	userGroup.POST("/upload", api.Upload)
+	userGroup.POST("/comment/:article_id", api.CreateComment)
+	userGroup.POST("/like/:like_type/:target_id", api.Like)
 
 	adminGroup := v1.Group("/admin", middleware.AuthMiddleware, middleware.AdminMiddleware, middleware.PermissionMiddleware, middleware.OperationLogMiddleware)
 	adminGroup.GET("/articles", api.AdminArticleList)
@@ -57,6 +61,11 @@ func NewRouter() *echo.Echo {
 	adminGroup.PUT("/users/:id", api.UpdateUser)
 	adminGroup.PUT("/users/:id/password", api.ResetPassword)
 	adminGroup.PUT("/users/:id/status", api.ChangeUserStatus)
+	adminGroup.GET("/dashboard", api.Dashboard)
+	adminGroup.GET("/configs", api.GetConfigList)
+	adminGroup.PUT("/configs/:key", api.UpdateConfig)
+	adminGroup.PUT("/about", api.UpdateAbout)
+	adminGroup.DELETE("/comment/:id", api.DeleteComment)
 
 	return e
 }

@@ -171,6 +171,16 @@ type CreateCategoryReq struct {
 	Desc string `json:"desc"`
 }
 
+func (r *CreateCategoryReq) Validate() error {
+	if r.Name == "" {
+		return errors.New("empty name")
+	}
+	if r.Desc == "" {
+		return errors.New("empty desc")
+	}
+	return nil
+}
+
 type CategoryListReq struct {
 	PageReq
 }
@@ -189,6 +199,13 @@ type CreateRoleReq struct {
 	Desc string `json:"desc"`
 }
 
+func (r CreateRoleReq) Validate() error {
+	if r.Name == "" {
+		return errors.New("name is empty")
+	}
+	return nil
+}
+
 type RoleListReq struct {
 	PageReq
 }
@@ -199,6 +216,13 @@ type CreateMenuReq struct {
 	Path     string `json:"path"`
 	Sort     int    `json:"sort"`
 	Status   int    `json:"status"`
+}
+
+func (r CreateMenuReq) Validate() error {
+	if r.Name == "" || r.Path == "" {
+		return errors.New("name or path is empty")
+	}
+	return nil
 }
 
 type MenuListReq struct {
@@ -224,6 +248,71 @@ type ChangeUserStatusReq struct {
 func (r *ChangeUserStatusReq) Validate() error {
 	if r.Status != 0 && r.Status != 1 {
 		return errors.New("status 只能是0 /1")
+	}
+	return nil
+}
+
+type UpdateConfigReq struct {
+	Key   string `gorm:"unique;type:varchar(256)" json:"key"`
+	Value string `gorm:"type:varchar(256)" json:"value"`
+	Desc  string `gorm:"type:varchar(256)" json:"desc"`
+}
+
+func (req *UpdateConfigReq) Validate() error {
+	if req.Key == "" {
+		return errors.New("key is empty")
+	}
+	if req.Value == "" {
+		return errors.New("value is empty")
+	}
+	return nil
+}
+
+type GetConfigReq struct {
+	Key string `gorm:"unique;type:varchar(256)" json:"key"`
+}
+
+type CommentListReq struct {
+	ArticleID int `json:"article_id"`
+	PageReq
+}
+
+func (r *CommentListReq) Validate() error {
+	if r.ArticleID <= 0 {
+		return errors.New("invalid articleID")
+	}
+	return nil
+}
+
+type CreateCommentReq struct {
+	UserID    int    `json:"-"`
+	ArticleID int    `json:"article_id"`
+	Content   string `json:"content"`
+	ReplyID   int    `json:"reply_id"`
+}
+
+func (req *CreateCommentReq) Validate() error {
+	if req.UserID <= 0 {
+		return errors.New("invalid userID")
+	}
+	if req.ArticleID <= 0 {
+		return errors.New("invalid ArticleID")
+	}
+	if req.Content == "" {
+		return errors.New("content is empty")
+	}
+	return nil
+}
+
+type SetORUndoLikeReq struct {
+	UserID   int `json:"-"`
+	TargetID int `json:"article_id"`
+	LikeType int `json:"like_type"`
+}
+
+func (r *SetORUndoLikeReq) Validate() error {
+	if r.UserID <= 0 || r.TargetID <= 0 || r.LikeType <= 0 {
+		return errors.New("invalid request")
 	}
 	return nil
 }

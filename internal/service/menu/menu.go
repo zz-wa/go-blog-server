@@ -14,22 +14,22 @@ func NewMenuService() *MenuService {
 	return &MenuService{}
 }
 
-func (s *MenuService) CreateMenu(req *request.CreateMenuReq) error {
-	if req == nil {
+func (s *MenuService) CreateMenu(Req *request.CreateMenuReq) error {
+	if Req == nil {
 		return errors.New("invalid request")
 	}
-	if req.Name == "" || req.Path == "" {
-		return errors.New("name or path is empty")
+	if err := Req.Validate(); err != nil {
+		return err
 	}
-	if _, err := menuRepo.GetMenuByPath(req.Path); err == nil {
+	if _, err := menuRepo.GetMenuByPath(Req.Path); err == nil {
 		return errors.New("menu path already exists")
 	}
 	newMenu := &model.Menu{
-		ParentID: req.ParentID,
-		Name:     req.Name,
-		Path:     req.Path,
-		Sort:     req.Sort,
-		Status:   req.Status,
+		ParentID: Req.ParentID,
+		Name:     Req.Name,
+		Path:     Req.Path,
+		Sort:     Req.Sort,
+		Status:   Req.Status,
 	}
 	if err := menuRepo.CreateMenu(newMenu); err != nil {
 		return errors.New("fail to create menu")

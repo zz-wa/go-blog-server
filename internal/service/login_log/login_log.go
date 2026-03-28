@@ -19,9 +19,11 @@ func (s *LoginLogService) LoginLogList(req *request.LogListReq) ([]model.LoginLo
 		return nil, 0, errors.New("invalid request")
 	}
 	var filterUserID *int
-	if req.UserID > 0 {
-		filterUserID = &req.UserID
+
+	if err := req.Validate(); err != nil {
+		return nil, 0, err
 	}
+
 	loginList, total, err := login_log.ListLoginLog(req.Page, req.PageSize, filterUserID)
 	if err != nil {
 		return nil, total, err

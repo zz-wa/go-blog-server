@@ -126,3 +126,12 @@ func DeleteArticle(c *echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, response.OK(nil))
 }
+
+func ArticleArchive(c *echo.Context) error {
+	articleService := article.NewArticleService()
+	articleArchive, err := articleService.GetArticleArchive()
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, err.Error()))
+	}
+	return c.JSON(http.StatusOK, response.OK(articleArchive))
+}

@@ -18,8 +18,8 @@ func (s *RoleService) CreateRole(req *request.CreateRoleReq) error {
 	if req == nil {
 		return errors.New("invalid request")
 	}
-	if req.Name == "" {
-		return errors.New("name is empty")
+	if err := req.Validate(); err != nil {
+		return err
 	}
 	if _, err := roleRepo.GetRoleByName(req.Name); err == nil {
 		return errors.New("role already exists")

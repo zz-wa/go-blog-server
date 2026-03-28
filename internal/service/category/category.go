@@ -14,16 +14,16 @@ func NewCategoryService() *CategoryService {
 	return &CategoryService{}
 }
 
-func (s *CategoryService) CreateCategory(Req *request.CreateCategoryReq) error {
-	if Req == nil {
+func (s *CategoryService) CreateCategory(req *request.CreateCategoryReq) error {
+	if req == nil {
 		return errors.New("invalid request")
 	}
-	if Req.Name == "" {
-		return errors.New("name is empty")
+	if err := req.Validate(); err != nil {
+		return err
 	}
 	SetCategory := &model.Category{}
-	SetCategory.Name = Req.Name
-	SetCategory.Desc = Req.Desc
+	SetCategory.Name = req.Name
+	SetCategory.Desc = req.Desc
 
 	if err := categoryRepo.CreateCategory(SetCategory); err != nil {
 		return errors.New("fail to create category")
@@ -42,13 +42,13 @@ func (s *CategoryService) GetCategoryByID(id int) (model.Category, error) {
 	return Category, nil
 }
 
-func (s *CategoryService) GetCategoryList(Req *request.CategoryListReq) ([]model.Category, int64, error) {
-	if Req == nil {
+func (s *CategoryService) GetCategoryList(req *request.CategoryListReq) ([]model.Category, int64, error) {
+	if req == nil {
 		return nil, 0, errors.New("invalid request")
 	}
-	Req.SetDefault()
+	req.SetDefault()
 
-	CatrgoryList, total, err := categoryRepo.GetCategoryList(Req.Page, Req.PageSize)
+	CatrgoryList, total, err := categoryRepo.GetCategoryList(req.Page, req.PageSize)
 	if err != nil {
 		return nil, total, errors.New("fail to get category list")
 	}

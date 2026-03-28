@@ -2,9 +2,11 @@ p, reader, /api/v1/public/register, POST
 p, reader, /api/v1/public/login, POST
 p, reader, /api/v1/public/articles, GET
 p, reader, /api/v1/public/articles/:id, GET
+p, reader, /api/v1/public/archive, GET
+p, reader, /api/v1/public/about, GET
 
-p, reader, /api/v1/user/profile, GET
-p, reader, /api/v1/user/upload, POST
+p, user, /api/v1/user/comment/:article_id, POST
+p, user, /api/v1/user/like/:like_type/:target_id, POST
 
 p, admin, /api/v1/admin/articles, GET
 p, admin, /api/v1/admin/articles/:id, GET
@@ -42,5 +44,11 @@ p, admin, /api/v1/admin/userlist, GET
 p, admin, /api/v1/admin/users/:id, PUT
 p, admin, /api/v1/admin/users/:id/password, PUT
 p, admin, /api/v1/admin/users/:id/status, PUT
+p, admin, /api/v1/admin/dashboard, GET
+p, admin, /api/v1/admin/configs, GET
+p, admin, /api/v1/admin/configs/:key, PUT
+p, admin, /api/v1/admin/about, PUT
+
+p, admin, /api/v1/admin/comment/:id, DELETE
 
 g, admin, reader

@@ -74,6 +74,11 @@ type UserListRes struct {
 	Total int64      `json:"total"`
 }
 
+type CommentListResp struct {
+	List  []model.Comment `json:"list"`
+	Total int64           `json:"total"`
+}
+
 const (
 	CodeOk           = 0
 	CodeBadRequest   = 4001
