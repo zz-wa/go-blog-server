@@ -4,7 +4,6 @@ import (
 	"blog_r/internal/model"
 	"blog_r/internal/pkg/jwt"
 	"blog_r/internal/repository/login_log"
-	userRepo "blog_r/internal/repository/user"
 	"blog_r/internal/request"
 	"errors"
 	"time"
@@ -14,22 +13,38 @@ import (
 )
 
 type UserService struct {
+	repo UserRepo
 }
 
-func NewUserService() *UserService {
-	return &UserService{}
+type UserRepo interface {
+	CreateUser(user *model.User) error
+	GetByUsername(name string) (model.User, error)
+	GetByEmail(email string) (model.User, error)
+	GetByID(id int) (model.User, error)
+	UpdateUser(id int, req *model.User) error
+	ResetPassword(id int, hashedPassword string) error
+	UpdateUserStatus(id int, status int) error
+}
+
+func NewUserService(repo UserRepo) *UserService {
+	return &UserService{
+		repo: repo,
+	}
 }
 
 func (s *UserService) Register(req *request.RegisterReq) error {
-	if req.Password == "" || req.Username == "" || req.Email == "" {
+	if req == nil {
 		return errors.New("invalid request")
 	}
-	if _, err := userRepo.GetByUsername(req.Username); err == nil {
+	if err := req.Validate(); err != nil {
+		return err
+	}
+	if _, err := s.repo.GetByUsername(req.Username); err == nil {
 		return errors.New("username already exists")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
-	if _, err := userRepo.GetByEmail(req.Email); err == nil {
+	if _, err := s.repo.GetByEmail(req.Email); err == nil {
 		return errors.New("email already exists")
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
@@ -45,7 +60,7 @@ func (s *UserService) Register(req *request.RegisterReq) error {
 		return err
 	}
 	user.Password = string(password)
-	if err := userRepo.CreateUser(&user); err != nil {
+	if err := s.repo.CreateUser(&user); err != nil {
 		return err
 	}
 	return nil
@@ -63,7 +78,7 @@ func (s *UserService) Login(req *request.LoginReq, ip string) (string, time.Time
 		})
 		return "", time.Time{}, errors.New("invalid request")
 	}
-	user, err := userRepo.GetByEmail(req.Email)
+	user, err := s.repo.GetByEmail(req.Email)
 	if err != nil {
 		_ = login_log.InsertLoginLog(&model.LoginLog{
 			UserID:  0,
@@ -107,7 +122,7 @@ func (s *UserService) Login(req *request.LoginReq, ip string) (string, time.Time
 }
 
 func (s *UserService) Profile(id int) (model.User, error) {
-	user, err := userRepo.GetByID(id)
+	user, err := s.repo.GetByID(id)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -125,20 +140,20 @@ func (s *UserService) UpdateUser(id int, req *request.UpdateUserReq) error {
 		return err
 	}
 
-	user, err := userRepo.GetByID(id)
+	user, err := s.repo.GetByID(id)
 	if err != nil {
 		return err
 	}
 
 	if req.Username != user.Username {
-		if u, err := userRepo.GetByUsername(req.Username); err == nil && u.ID != id {
+		if u, err := s.repo.GetByUsername(req.Username); err == nil && u.ID != id {
 			return errors.New("username already exists")
 		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
 		}
 	}
 	if req.Email != user.Email {
-		if u, err := userRepo.GetByEmail(req.Email); err == nil && u.ID != id {
+		if u, err := s.repo.GetByEmail(req.Email); err == nil && u.ID != id {
 			return errors.New("email already exists")
 		} else if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
@@ -151,7 +166,7 @@ func (s *UserService) UpdateUser(id int, req *request.UpdateUserReq) error {
 		Role:     req.Role,
 		Status:   req.Status,
 	}
-	return userRepo.UpdateUser(id, update)
+	return s.repo.UpdateUser(id, update)
 }
 func (s *UserService) ResetPassword(id int, req *request.ResetPasswordReq) error {
 	if id <= 0 || req == nil {
@@ -160,7 +175,7 @@ func (s *UserService) ResetPassword(id int, req *request.ResetPasswordReq) error
 	if err := req.Validate(); err != nil {
 		return err
 	}
-	if _, err := userRepo.GetByID(id); err != nil {
+	if _, err := s.repo.GetByID(id); err != nil {
 		return err
 	}
 
@@ -168,7 +183,7 @@ func (s *UserService) ResetPassword(id int, req *request.ResetPasswordReq) error
 	if err != nil {
 		return err
 	}
-	return userRepo.ResetPassword(id, string(hashed))
+	return s.repo.ResetPassword(id, string(hashed))
 }
 
 func (s *UserService) ChangeUserStatus(id int, req *request.ChangeUserStatusReq) error {
@@ -179,9 +194,9 @@ func (s *UserService) ChangeUserStatus(id int, req *request.ChangeUserStatusReq)
 		return err
 	}
 
-	if _, err := userRepo.GetByID(id); err != nil {
+	if _, err := s.repo.GetByID(id); err != nil {
 		return err
 	}
 
-	return userRepo.UpdateUserStatus(id, req.Status)
+	return s.repo.UpdateUserStatus(id, req.Status)
 }

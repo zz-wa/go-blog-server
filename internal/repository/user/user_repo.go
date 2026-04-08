@@ -6,11 +6,17 @@ import (
 	"errors"
 )
 
-func CreateUser(user *model.User) error {
+type Repo struct{}
+
+func NewRepo() *Repo {
+	return &Repo{}
+}
+
+func (r *Repo) CreateUser(user *model.User) error {
 	return global.DB.Create(user).Error
 }
 
-func GetByUsername(name string) (model.User, error) {
+func (r *Repo) GetByUsername(name string) (model.User, error) {
 	user := model.User{}
 	db := global.DB.Where("username=?", name).First(&user)
 	if db.Error != nil {
@@ -19,7 +25,7 @@ func GetByUsername(name string) (model.User, error) {
 	return user, nil
 }
 
-func GetByEmail(email string) (model.User, error) {
+func (r *Repo) GetByEmail(email string) (model.User, error) {
 	user := model.User{}
 	db := global.DB.Where("email=?", email).First(&user)
 	if db.Error != nil {
@@ -28,7 +34,7 @@ func GetByEmail(email string) (model.User, error) {
 	return user, nil
 }
 
-func GetByID(id int) (model.User, error) {
+func (r *Repo) GetByID(id int) (model.User, error) {
 	user := model.User{}
 	db := global.DB.Where("id=?", id).First(&user)
 	if db.Error != nil {
@@ -37,7 +43,7 @@ func GetByID(id int) (model.User, error) {
 	return user, nil
 }
 
-func UpdateUser(id int, req *model.User) error {
+func (r *Repo) UpdateUser(id int, req *model.User) error {
 	if id <= 0 || req == nil {
 		return errors.New("invalid request")
 	}
@@ -50,7 +56,7 @@ func UpdateUser(id int, req *model.User) error {
 	return global.DB.Model(&model.User{}).Where("id = ?", id).Updates(updates).Error
 }
 
-func ResetPassword(id int, hashedPassword string) error {
+func (r *Repo) ResetPassword(id int, hashedPassword string) error {
 	if id <= 0 || hashedPassword == "" {
 		return errors.New("invalid request")
 	}
@@ -64,7 +70,7 @@ func ResetPassword(id int, hashedPassword string) error {
 	return nil
 }
 
-func UpdateUserStatus(id int, status int) error {
+func (r *Repo) UpdateUserStatus(id int, status int) error {
 	if id <= 0 {
 		return errors.New("invalid request")
 	}

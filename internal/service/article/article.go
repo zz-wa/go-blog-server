@@ -1,9 +1,7 @@
 package article
 
 import (
-	"blog_r/internal/global"
 	"blog_r/internal/model"
-	articleRepo "blog_r/internal/repository/article"
 	"blog_r/internal/repository/tag"
 	"blog_r/internal/request"
 	"errors"
@@ -11,6 +9,17 @@ import (
 )
 
 type ArticleService struct {
+	repo ArticleRepo
+}
+
+type ArticleRepo interface {
+	CreateArticle(article *model.Article) error
+	GetArticleByID(id int) (model.Article, error)
+	GetArticleList(page, pageSize int, status *int, categoryID, tagID int, keyWord string) ([]model.Article, int64, error)
+	GetPublishedArticleForArchive() ([]model.Article, error)
+	UpdateArticle(article *model.Article) error
+	DeleteArticle(id int) error
+	ReplaceArticleTag(NewArticle *model.Article, newTags []model.Tag) error
 }
 
 // 显m示的具体文章的结构体
@@ -26,16 +35,15 @@ type ArchiveGroup struct {
 	Articles []ArchiveArticleItem `json:"articles" `
 }
 
-func NewArticleService() *ArticleService {
-	return &ArticleService{}
+func NewArticleService(repo ArticleRepo) *ArticleService {
+	return &ArticleService{
+		repo: repo,
+	}
 }
 
 func (s *ArticleService) CreateArticle(req *request.CreateArticleReq) error {
 	if req == nil {
 		return errors.New("invalid request")
-	}
-	if err := req.Validate(); err != nil {
-		return err
 	}
 
 	if err := req.Validate(); err != nil {
@@ -56,7 +64,7 @@ func (s *ArticleService) CreateArticle(req *request.CreateArticleReq) error {
 		}
 		SetArticle.Tags = tags
 	}
-	if err := articleRepo.CreateArticle(SetArticle); err != nil {
+	if err := s.repo.CreateArticle(SetArticle); err != nil {
 		return errors.New("failed to create article")
 	}
 	return nil
@@ -67,7 +75,7 @@ func (s *ArticleService) GetArticleByID(id int) (model.Article, error) {
 		return model.Article{}, errors.New("invalid article ID")
 	}
 	var Article model.Article
-	Article, err := articleRepo.GetArticleByID(id)
+	Article, err := s.repo.GetArticleByID(id)
 	if err != nil {
 		return model.Article{}, errors.New("article not found")
 	}
@@ -80,7 +88,7 @@ func (s *ArticleService) GetArticleList(req *request.ArticleListReq) ([]model.Ar
 	}
 	req.SetDefault()
 
-	ArticleList, total, err := articleRepo.GetArticleList(req.Page, req.PageSize, req.Status, req.CategoryID, req.TagID, req.Keyword)
+	ArticleList, total, err := s.repo.GetArticleList(req.Page, req.PageSize, req.Status, req.CategoryID, req.TagID, req.Keyword)
 	if err != nil {
 		return nil, 0, errors.New("failed to get article list")
 	}
@@ -92,7 +100,7 @@ func (s *ArticleService) UpdateArticle(id int, NewArticle *model.Article, tagIDs
 		return errors.New("invalid request")
 	}
 	NewArticle.ID = id
-	if err := articleRepo.UpdateArticle(NewArticle); err != nil {
+	if err := s.repo.UpdateArticle(NewArticle); err != nil {
 		return errors.New("failed to update article")
 	}
 	var newTags []model.Tag
@@ -103,7 +111,7 @@ func (s *ArticleService) UpdateArticle(id int, NewArticle *model.Article, tagIDs
 		}
 		newTags = tags
 	}
-	if err := global.DB.Model(NewArticle).Association("Tags").Replace(newTags); err != nil {
+	if err := s.repo.ReplaceArticleTag(NewArticle, newTags); err != nil {
 		return errors.New("failed to update article tags")
 	}
 	return nil
@@ -113,14 +121,14 @@ func (s *ArticleService) DeleteArticle(id int) error {
 	if id <= 0 {
 		return errors.New("invalid article ID")
 	}
-	err := articleRepo.DeleteArticle(id)
+	err := s.repo.DeleteArticle(id)
 	if err != nil {
 		return errors.New("failed to delete article")
 	}
 	return nil
 }
 func (s *ArticleService) GetArticleArchive() ([]ArchiveGroup, error) {
-	articles, err := articleRepo.GetPublishedArticleForArchive()
+	articles, err := s.repo.GetPublishedArticleForArchive()
 	var AllTimes []string
 	if err != nil {
 		return nil, err

@@ -1,6 +1,7 @@
 package api
 
 import (
+	user2 "blog_r/internal/repository/user"
 	"blog_r/internal/request"
 	"blog_r/internal/response"
 	"blog_r/internal/service/user"
@@ -19,7 +20,7 @@ func Register(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, err.Error()))
 	}
 
-	user := user.NewUserService()
+	user := user.NewUserService(user2.NewRepo())
 	if err := user.Register(req); err != nil {
 		if err.Error() == "username already exists" || err.Error() == "email already exists" {
 			return c.JSON(http.StatusConflict, response.Fail(response.CodeConflict, err.Error()))
@@ -40,7 +41,7 @@ func Login(c *echo.Context) error {
 	if err := req.Validate(); err != nil {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, err.Error()))
 	}
-	userServeice := user.NewUserService()
+	userServeice := user.NewUserService(user2.NewRepo())
 	token, exp, err := userServeice.Login(req, ip)
 	if err != nil {
 		if err.Error() == "email not found" || err.Error() == "password error" {
@@ -60,7 +61,7 @@ func Profile(c *echo.Context) error {
 	if !ok || userID <= 0 {
 		return c.JSON(http.StatusUnauthorized, response.Fail(response.CodeUnauthorized, "未登录"))
 	}
-	userService := user.NewUserService()
+	userService := user.NewUserService(user2.NewRepo())
 	profile, err := userService.Profile(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "服务器内部错误"))
@@ -88,7 +89,7 @@ func UpdateUser(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, err.Error()))
 	}
 
-	userService := user.NewUserService()
+	userService := user.NewUserService(user2.NewRepo())
 	if err := userService.UpdateUser(id, req); err != nil {
 		if err.Error() == "username already exists" || err.Error() == "email already exists" {
 			return c.JSON(http.StatusConflict, response.Fail(response.CodeConflict, err.Error()))
@@ -113,7 +114,7 @@ func ResetPassword(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, err.Error()))
 	}
 
-	userService := user.NewUserService()
+	userService := user.NewUserService(user2.NewRepo())
 	if err := userService.ResetPassword(id, req); err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "服务器内部错误"))
 	}
@@ -133,7 +134,7 @@ func ChangeUserStatus(c *echo.Context) error {
 	if err := req.Validate(); err != nil {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, err.Error()))
 	}
-	userService := user.NewUserService()
+	userService := user.NewUserService(user2.NewRepo())
 	if err := userService.ChangeUserStatus(id, req); err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "服务器内部错误"))
 	}

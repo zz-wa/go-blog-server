@@ -2,16 +2,22 @@ package comment
 
 import (
 	"blog_r/internal/model"
-	"blog_r/internal/repository/comment"
 	"blog_r/internal/request"
 	"errors"
 )
 
-type CommentService struct {
+type CommentRepo interface {
+	CreateComment(comment *model.Comment) error
+	GetCommentList(articleID, page, pageSize int) ([]model.Comment, int64, error)
+	DeleteComment(id int) error
 }
 
-func NewCommentService() *CommentService {
-	return &CommentService{}
+type CommentService struct {
+	repo CommentRepo
+}
+
+func NewCommentService(repo CommentRepo) *CommentService {
+	return &CommentService{repo: repo}
 }
 
 func (s *CommentService) CreateComment(req *request.CreateCommentReq) error {
@@ -27,7 +33,7 @@ func (s *CommentService) CreateComment(req *request.CreateCommentReq) error {
 	SetComment.Content = req.Content
 	SetComment.ReplyID = req.ReplyID
 
-	if err := comment.CreateComment(SetComment); err != nil {
+	if err := s.repo.CreateComment(SetComment); err != nil {
 		return errors.New("failed to create commment")
 	}
 	return nil
@@ -42,7 +48,7 @@ func (s *CommentService) GetCommentList(req *request.CommentListReq) ([]model.Co
 	if err := req.Validate(); err != nil {
 		return nil, 0, err
 	}
-	CommentList, total, err := comment.GetCommentList(req.ArticleID, req.Page, req.PageSize)
+	CommentList, total, err := s.repo.GetCommentList(req.ArticleID, req.Page, req.PageSize)
 	if err != nil {
 		return nil, 0, errors.New("failde to get comment list")
 	}
@@ -53,7 +59,7 @@ func (s *CommentService) DeleteComment(id int) error {
 	if id <= 0 {
 		return errors.New("invalid comment id")
 	}
-	if err := comment.DeleteComment(id); err != nil {
+	if err := s.repo.DeleteComment(id); err != nil {
 		return errors.New("fail to delete comment")
 	}
 	return nil

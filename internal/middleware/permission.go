@@ -27,7 +27,7 @@ func PermissionMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if _, ok := userID.(int); !ok {
 			return c.JSON(403, response.Fail(response.CodeForbidden, "forbidden"))
 		}
-		users, err := user.GetByID(userID.(int))
+		users, err := user.NewRepo().GetByID(userID.(int))
 		if err != nil {
 			return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "fail to get user data"))
 		}

@@ -30,7 +30,7 @@ func (s *UserListService) GetUserList(req *request.UserListReq) ([]response.User
 			Email:     u.Email,
 			Status:    u.Status,
 			Role:      u.Role,
-			CreatedAt: u.CreatedAt,
+			CreatedAt: u.CreatedAt, 
 		})
 	}
 	return items, total, nil

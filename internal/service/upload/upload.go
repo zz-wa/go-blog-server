@@ -32,9 +32,9 @@ func Allow(target string, array []string) bool {
 	return false
 }
 func (l *Local) Uploads(file *multipart.FileHeader) (fileName, filePath string, err error) {
-	extOriginal := filepath.Ext(file.Filename) // 例如 ".JPG"
+	extOriginal := filepath.Ext(file.Filename)
 	base := strings.TrimSuffix(file.Filename, extOriginal)
-	ext := strings.ToLower(extOriginal) // 例如 ".jpg"
+	ext := strings.ToLower(extOriginal)
 
 	maxBytes := int64(global.Conf.Upload.Size) * 1024 * 1024
 	if file.Size > maxBytes {

@@ -1,6 +1,7 @@
 package api
 
 import (
+	commentRepo "blog_r/internal/repository/comment"
 	"blog_r/internal/request"
 	"blog_r/internal/response"
 	"blog_r/internal/service/comment"
@@ -28,7 +29,7 @@ func CreateComment(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, "param article id error"))
 	}
 	req.ArticleID = id
-	CommentService := comment.NewCommentService()
+	CommentService := comment.NewCommentService(commentRepo.NewRepo())
 	if err := CommentService.CreateComment(req); err != nil {
 		return c.JSON(500, response.Fail(response.CodeServerError, "服务器内部错误"))
 	}
@@ -48,7 +49,7 @@ func CommentList(c *echo.Context) error {
 	}
 	req.ArticleID = id
 
-	CommentService := comment.NewCommentService()
+	CommentService := comment.NewCommentService(commentRepo.NewRepo())
 	commentlist, total, err := CommentService.GetCommentList(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "error for get details"))
@@ -66,7 +67,7 @@ func DeleteComment(c *echo.Context) error {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, "invalid request"))
 	}
 
-	CommentService := comment.NewCommentService()
+	CommentService := comment.NewCommentService(commentRepo.NewRepo())
 	if err := CommentService.DeleteComment(id); err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "fail to delete article"))
 	}

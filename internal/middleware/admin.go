@@ -21,7 +21,7 @@ func AdminMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		if _, ok := userID.(int); !ok {
 			return c.JSON(403, response.Fail(response.CodeForbidden, "forbidden"))
 		}
-		users, err := user.GetByID(userID.(int))
+		users, err := user.NewRepo().GetByID(userID.(int))
 		if err != nil {
 			return c.JSON(500, response.Fail(response.CodeServerError, "服务器内部错误"))
 		}

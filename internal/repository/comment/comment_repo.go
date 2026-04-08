@@ -6,17 +6,15 @@ import (
 	"errors"
 )
 
-/*
-CreateComment
-GetCommentList(articleID, page, pageSize int, isReview *bool)
-UpdateReview(id int, isReview bool)
-DeleteComment(id int)*/
+type Repo struct{}
 
-func CreateComment(comment *model.Comment) error {
+func NewRepo() *Repo { return &Repo{} }
+
+func (r *Repo) CreateComment(comment *model.Comment) error {
 	return global.DB.Create(comment).Error
 }
 
-func GetCommentList(articleID, page, pageSize int) ([]model.Comment, int64, error) {
+func (r *Repo) GetCommentList(articleID, page, pageSize int) ([]model.Comment, int64, error) {
 	db := global.DB.Model(&model.Comment{})
 	var comments []model.Comment
 	if page <= 0 || pageSize <= 0 {
@@ -32,6 +30,6 @@ func GetCommentList(articleID, page, pageSize int) ([]model.Comment, int64, erro
 	return comments, total, nil
 }
 
-func DeleteComment(id int) error {
+func (r *Repo) DeleteComment(id int) error {
 	return global.DB.Where("id=?", id).Delete(&model.Comment{}).Error
 }

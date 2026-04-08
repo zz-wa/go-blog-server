@@ -2,6 +2,7 @@ package api
 
 import (
 	"blog_r/internal/model"
+	articleRepo "blog_r/internal/repository/article"
 	"blog_r/internal/request"
 	"blog_r/internal/response"
 	"blog_r/internal/service/article"
@@ -19,7 +20,7 @@ func CreateArticle(c *echo.Context) error {
 	if err := req.Validate(); err != nil {
 		return c.JSON(400, response.Fail(response.CodeBadRequest, err.Error()))
 	}
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	if err := articleService.CreateArticle(req); err != nil {
 		return c.JSON(500, response.Fail(response.CodeServerError, "服务器内部错误"))
 	}
@@ -36,7 +37,7 @@ func ArticleList(c *echo.Context) error {
 		one := 1
 		req.Status = &one
 	}
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	list, total, err := articleService.GetArticleList(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "error for get details"))
@@ -53,7 +54,7 @@ func AdminArticleList(c *echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return c.JSON(400, response.Fail(response.CodeBadRequest, "参数错误"))
 	}
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	list, total, err := articleService.GetArticleList(req)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "error for get details"))
@@ -71,7 +72,7 @@ func ArticleDetail(c *echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, "invalid id number"))
 	}
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	articleDetail, err := articleService.GetArticleByID(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "error"))
@@ -104,7 +105,7 @@ func UpdateArticle(c *echo.Context) error {
 		Status:     req.Status,
 	}
 
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	err = articleService.UpdateArticle(id, updateA, req.Tags)
 
 	if err != nil {
@@ -119,7 +120,7 @@ func DeleteArticle(c *echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, response.Fail(response.CodeBadRequest, "invalid request"))
 	}
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	err = articleService.DeleteArticle(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, "fail to delete article"))
@@ -128,7 +129,7 @@ func DeleteArticle(c *echo.Context) error {
 }
 
 func ArticleArchive(c *echo.Context) error {
-	articleService := article.NewArticleService()
+	articleService := article.NewArticleService(articleRepo.NewRepo())
 	articleArchive, err := articleService.GetArticleArchive()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, response.Fail(response.CodeServerError, err.Error()))

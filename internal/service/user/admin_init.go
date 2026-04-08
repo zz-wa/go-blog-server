@@ -16,13 +16,13 @@ func InitAdmin(conf *global.Config) error {
 	}
 
 	// 如果管理员已存在（邮箱或用户名），不再创建
-	if _, err := userRepo.GetByEmail(conf.Admin.Email); err == nil {
+	if _, err := userRepo.NewRepo().GetByEmail(conf.Admin.Email); err == nil {
 		return nil
 	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 		return err
 	}
 	if conf.Admin.Username != "" {
-		if _, err := userRepo.GetByUsername(conf.Admin.Username); err == nil {
+		if _, err := userRepo.NewRepo().GetByUsername(conf.Admin.Username); err == nil {
 			return nil
 		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
 			return err
@@ -42,5 +42,5 @@ func InitAdmin(conf *global.Config) error {
 		Status:   1,
 	}
 
-	return userRepo.CreateUser(&admin)
+	return userRepo.NewRepo().CreateUser(&admin)
 }
